@@ -1,0 +1,12 @@
+// lib/services/services.dart
+// Barrel file — import this single file to access all services
+
+export 'api_service.dart';
+export 'auth_service.dart';
+export 'photographer_service.dart';
+export 'booking_service.dart';
+export 'message_service.dart';
+export 'rating_service.dart';
+export 'report_service.dart';
+export 'subscription_service.dart';
+export 'admin_service.dart';
