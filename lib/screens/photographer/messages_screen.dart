@@ -181,7 +181,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _msgCtrl.clear();
     setState(() => _sending = true);
     try {
-      await MessageService.sendMessage(
+      await MessageService.send(
         receiverId: widget.userId!,
         message: text,
       );
@@ -191,6 +191,8 @@ class _ChatScreenState extends State<ChatScreen> {
     } finally {
       setState(() => _sending = false);
     }
+    if (!mounted) return;
+    _scrollToBottom();
   }
 
   @override

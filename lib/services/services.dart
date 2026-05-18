@@ -1,6 +1,4 @@
 // lib/services/services.dart
-// Barrel file — import this single file to access all services
-
 export 'api_service.dart';
 export 'auth_service.dart';
 export 'photographer_service.dart';

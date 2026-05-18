@@ -5,124 +5,147 @@ import 'package:flutter/foundation.dart';
 import 'api_service.dart';
 import '../config/api_config.dart';
 
+// Base URL without /api suffix — for building storage URLs
+const String _storageBase = 'http://192.168.100.8:8000';
+
+/// Builds a full URL from any path format Laravel might return.
+/// Handles: full URLs, /storage/... paths, storage/... paths, bare paths.
+String buildStorageUrl(String? path) {
+  if (path == null || path.trim().isEmpty) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (path.startsWith('/storage/')) return '$_storageBase$path';
+  if (path.startsWith('storage/'))  return '$_storageBase/$path';
+  return '$_storageBase/storage/$path';
+}
+
 class PhotographerService {
-  // ── Public: list all active photographers ────────────────────────────────
+  // ── GET /photographers  (public) ──────────────────────────────────
   static Future<Map<String, dynamic>> getAll({
     Map<String, dynamic>? filters,
   }) async {
     try {
-      final res = await ApiService.get(
-        ApiConfig.photographers,
-        params: filters,
-      );
+      final res  = await ApiService.get(ApiConfig.photographers, params: filters);
       final data = res.data;
       if (data is Map) {
-        if (data['photographers'] is Map &&
-            data['photographers']['data'] != null) {
-          return Map<String, dynamic>.from(data)
-            ..['photographers'] = data['photographers']['data'];
-        }
-        if (data['photographers'] is List) {
-          return Map<String, dynamic>.from(data)
-            ..['photographers'] = data['photographers'];
-        }
-        if (data['data'] is List) {
-          return {'photographers': data};
+        // paginated: { data: [...] }
+        if (data['data'] is List) return {'photographers': data['data'], 'meta': data};
+        // wrapped: { photographers: [...] }
+        if (data['photographers'] is List) return Map<String, dynamic>.from(data);
+        if (data['photographers'] is Map && data['photographers']['data'] is List) {
+          return {'photographers': data['photographers']['data']};
         }
       }
-      return data;
+      return data is Map ? Map<String, dynamic>.from(data) : {};
     } on DioException catch (e) {
-      debugPrint('PhotographerService.getAll error: ${e.message}');
-      debugPrint('Status: ${e.response?.statusCode}');
-      debugPrint('Response: ${e.response?.data}');
+      debugPrint('getAll error ${e.response?.statusCode}: ${e.response?.data}');
       rethrow;
     }
   }
 
-  // ── Public: single photographer profile + portfolio + reviews ────────────
+  // ── GET /photographers/{id}  (public) ────────────────────────────
+  // Vue reads: data.photographer_profile, data.portfolios, data.ratings_received
+  // Flutter normalises to: { photographer, portfolio, reviews }
   static Future<Map<String, dynamic>> getById(int id) async {
     try {
-      debugPrint('Fetching photographer ID: $id');
-      final res = await ApiService.get('${ApiConfig.photographers}/$id');
+      final res  = await ApiService.get('${ApiConfig.photographers}/$id');
       final data = res.data as Map<String, dynamic>;
-      debugPrint('Photographer response keys: ${data.keys.toList()}');
 
-      Map<String, dynamic> photographer;
-      if (data['photographer'] != null) {
-        photographer = data['photographer'] as Map<String, dynamic>;
-      } else if (data['data'] != null) {
-        photographer = data['data'] as Map<String, dynamic>;
-      } else {
-        photographer = data;
-      }
+      // The response IS the photographer object directly
+      final portfolios      = data['portfolios']       as List? ?? [];
+      final ratingsReceived = data['ratings_received'] as List? ?? [];
 
-      final portfolio = data['portfolio'] as List? ?? [];
-      final reviews   = data['reviews']   as List? ?? [];
+      // Normalise ratings — add flat client_name for easy display
+      final reviews = ratingsReceived.map((r) {
+        return <String, dynamic>{
+          ...Map<String, dynamic>.from(r),
+          'client_name': r['client']?['name'] ?? 'Anonymous',
+        };
+      }).toList();
 
       return {
-        'photographer': photographer,
-        'portfolio':    portfolio,
+        'photographer': data,
+        'portfolio':    portfolios,
         'reviews':      reviews,
       };
     } on DioException catch (e) {
-      debugPrint('PhotographerService.getById($id) error: ${e.message}');
-      debugPrint('Status: ${e.response?.statusCode}');
-      debugPrint('Response: ${e.response?.data}');
+      debugPrint('getById($id) error ${e.response?.statusCode}: ${e.response?.data}');
       rethrow;
     }
   }
 
-  // ── Authenticated: own dashboard stats ───────────────────────────────────
+  // ── GET /photographer/dashboard  (auth) ───────────────────────────
   static Future<Map<String, dynamic>> getDashboard() async {
     try {
       final res = await ApiService.get(ApiConfig.dashboard);
       return res.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      debugPrint('PhotographerService.getDashboard error: ${e.message}');
-      debugPrint('Status: ${e.response?.statusCode}');
+      debugPrint('getDashboard error: ${e.message}');
       rethrow;
     }
   }
 
-  // ── Authenticated: update own profile ────────────────────────────────────
+  // ── PUT /photographer/profile  (auth) ────────────────────────────
+  // Vue uses PUT with JSON; multipart handled by upload()
   static Future<Map<String, dynamic>> updateProfile(FormData data) async {
     try {
       final res = await ApiService.upload(ApiConfig.profile, data);
       return res.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      debugPrint('PhotographerService.updateProfile error: ${e.message}');
+      debugPrint('updateProfile error: ${e.message}');
       rethrow;
     }
   }
 
-  // ── Authenticated: upload portfolio images ───────────────────────────────
+  // ── POST /photographer/portfolio  (auth, multipart) ───────────────
   static Future<Map<String, dynamic>> uploadPortfolio(FormData data) async {
     try {
       final res = await ApiService.upload(ApiConfig.portfolio, data);
       return res.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      debugPrint('PhotographerService.uploadPortfolio error: ${e.message}');
+      debugPrint('uploadPortfolio error: ${e.message}');
       rethrow;
     }
   }
 
-  // ── Authenticated: delete a portfolio item ───────────────────────────────
+  // ── DELETE /photographer/portfolio/{id}  (auth) ───────────────────
   static Future<void> deletePortfolioItem(int id) async {
     try {
       await ApiService.delete('${ApiConfig.portfolio}/$id');
     } on DioException catch (e) {
-      debugPrint('PhotographerService.deletePortfolioItem error: ${e.message}');
+      debugPrint('deletePortfolioItem error: ${e.message}');
       rethrow;
     }
   }
 
-  // ── Authenticated: get own portfolio ─────────────────────────────────────
-  static Future<List<dynamic>> getOwnPortfolio() async {
+  // ── POST /photographers/{id}/rate  (auth, client only) ────────────
+  static Future<Map<String, dynamic>> rate(
+      int photographerId, int stars, {String? comment}) async {
     try {
-      final data = await getDashboard();
-      return data['portfolio_analysis'] as List? ?? [];
-    } catch (_) {
+      final res = await ApiService.post(
+        '${ApiConfig.photographers}/$photographerId/rate',
+        data: {
+          'stars': stars,
+          if (comment != null && comment.isNotEmpty) 'comment': comment,
+        },
+      );
+      return res.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      debugPrint('rate error: ${e.message}');
+      rethrow;
+    }
+  }
+
+  // ── GET /photographers/{id}/ratings  (public) ─────────────────────
+  static Future<List<dynamic>> getRatings(int photographerId) async {
+    try {
+      final res  = await ApiService.get(
+          '${ApiConfig.photographers}/$photographerId/ratings');
+      final data = res.data;
+      if (data is List) return data;
       return [];
+    } on DioException catch (e) {
+      debugPrint('getRatings error: ${e.message}');
+      rethrow;
     }
   }
 }

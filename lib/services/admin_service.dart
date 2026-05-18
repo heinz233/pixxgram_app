@@ -4,118 +4,94 @@ import 'api_service.dart';
 import '../config/api_config.dart';
 
 class AdminService {
-  // ── GET /api/admin/dashboard ──────────────────────────────────────
-  // Returns: { total_photographers, active_photographers, total_clients,
-  //            pending_reports, total_revenue, monthly_revenue,
-  //            total_bookings, completed_bookings }
+  // ── Dashboard ──────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getStats() async {
     final res = await ApiService.get(ApiConfig.adminDashboard);
     return res.data;
   }
 
-  // ── GET /api/admin/photographers ──────────────────────────────────
-  // Optional filter: ?status=active|suspended|banned
-  // Returns paginated: { data: [...], total, per_page, ... }
-  static Future<Map<String, dynamic>> getPhotographers({
-    String? status,
-  }) async {
-    final res = await ApiService.get(
-      ApiConfig.adminPhotographers,
-      params: status != null ? {'status': status} : null,
-    );
+  // ── Photographers ──────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> getPhotographers({String? status}) async {
+    final res = await ApiService.get(ApiConfig.adminPhotographers,
+        params: status != null ? {'status': status} : null);
     return res.data;
   }
 
-  // ── PATCH /api/admin/photographers/{id}/status ───────────────────
-  // Required: status (active|suspended|banned)
   static Future<Map<String, dynamic>> updatePhotographerStatus(
       int id, String status) async {
     final res = await ApiService.patch(
-      '${ApiConfig.adminPhotographers}/$id/status',
-      data: {'status': status},
-    );
+        '${ApiConfig.adminPhotographers}/$id/status',
+        data: {'status': status});
     return res.data;
   }
 
-  // ── POST /api/admin/photographers/{id}/subscription ───────────────
-  // Required: action (force_delete|reactivate)
   static Future<Map<String, dynamic>> manageSubscription(
       int id, String action) async {
     final res = await ApiService.post(
-      '${ApiConfig.adminPhotographers}/$id/subscription',
-      data: {'action': action},
-    );
+        '${ApiConfig.adminPhotographers}/$id/subscription',
+        data: {'action': action});
     return res.data;
   }
 
-  // Convenience shorthands
   static Future<Map<String, dynamic>> approvePhotographer(int id) =>
       manageSubscription(id, 'reactivate');
   static Future<Map<String, dynamic>> suspendPhotographer(int id) =>
       updatePhotographerStatus(id, 'suspended');
 
-  // ── GET /api/admin/users ──────────────────────────────────────────
-  // Optional: ?role=admin|photographer|client
+  // ── Users ──────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getUsers({String? role}) async {
-    final res = await ApiService.get(
-      ApiConfig.adminUsers,
-      params: role != null ? {'role': role} : null,
-    );
+    final res = await ApiService.get(ApiConfig.adminUsers,
+        params: role != null ? {'role': role} : null);
     return res.data;
   }
 
-  // ── PATCH /api/admin/users/{id}/toggle-active ─────────────────────
   static Future<Map<String, dynamic>> toggleUserActive(int id) async {
-    final res = await ApiService.patch('${ApiConfig.adminUsers}/$id/toggle-active');
+    final res = await ApiService.patch(
+        '${ApiConfig.adminUsers}/$id/toggle-active');
     return res.data;
   }
 
-  // ── GET /api/admin/reports ────────────────────────────────────────
-  // Optional: ?status=pending|resolved|dismissed
+  // ── Reports ────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getReports({String? status}) async {
-    final res = await ApiService.get(
-      ApiConfig.adminReports,
-      params: status != null ? {'status': status} : null,
-    );
+    final res = await ApiService.get(ApiConfig.adminReports,
+        params: status != null ? {'status': status} : null);
     return res.data;
   }
 
-  // ── PATCH /api/admin/reports/{id}/resolve ─────────────────────────
   static Future<Map<String, dynamic>> resolveReport(int id) async {
     final res = await ApiService.patch('${ApiConfig.adminReports}/$id/resolve');
     return res.data;
   }
 
-  // ── PATCH /api/admin/reports/{id}/dismiss ─────────────────────────
   static Future<Map<String, dynamic>> dismissReport(int id) async {
     final res = await ApiService.patch('${ApiConfig.adminReports}/$id/dismiss');
     return res.data;
   }
 
-  // ── GET /api/admin/ratings ────────────────────────────────────────
+  // ── Ratings ────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getRatings({int? stars}) async {
-    final res = await ApiService.get(
-      ApiConfig.adminRatings,
-      params: stars != null ? {'stars': stars.toString()} : null,
-    );
+    final res = await ApiService.get(ApiConfig.adminRatings,
+        params: stars != null ? {'stars': stars.toString()} : null);
     return res.data;
   }
 
-  // ── DELETE /api/admin/ratings/{id} ───────────────────────────────
   static Future<Map<String, dynamic>> deleteRating(int id) async {
     final res = await ApiService.delete('${ApiConfig.adminRatings}/$id');
     return res.data;
   }
 
-  // ── GET /api/admin/subscriptions ─────────────────────────────────
-  static Future<Map<String, dynamic>> getSubscriptions() async {
-    final res = await ApiService.get(ApiConfig.adminSubscriptions);
+  // ── Subscriptions ──────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> getSubscriptions(
+      {Map<String, dynamic>? params}) async {
+    final res = await ApiService.get(ApiConfig.adminSubscriptions,
+        params: params);
     return res.data;
   }
 
-  // ── GET /api/admin/bookings ───────────────────────────────────────
-  static Future<Map<String, dynamic>> getBookings() async {
-    final res = await ApiService.get(ApiConfig.adminBookings);
+  // ── Bookings ───────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> getBookings(
+      {Map<String, dynamic>? params}) async {
+    final res = await ApiService.get(ApiConfig.adminBookings, params: params);
     return res.data;
   }
 
@@ -125,27 +101,24 @@ class AdminService {
     return res.data;
   }
 
-  static Future<Map<String, dynamic>> addLocation(
-      String name, String region) async {
-    final res = await ApiService.post(ApiConfig.adminLocations,
-        data: {'name': name, 'region': region});
+  // POST /admin/locations  { name, region }
+  static Future<void> createLocation({
+    required String name,
+    String? region,
+  }) async {
+    final data = {
+      'name': name,
+      if (region != null && region.trim().isNotEmpty) 'region': region.trim(),
+    };
+    final res = await ApiService.post(ApiConfig.adminLocations, data: data);
     return res.data;
   }
 
-  // Alias for addLocation to resolve compile errors
-  static Future<Map<String, dynamic>> createLocation({
-    required String name,
-    required String region,
-  }) async {
-    return addLocation(name, region);
-  }
-
+  // PUT /admin/locations/{id}
   static Future<Map<String, dynamic>> updateLocation(
       int id, Map<String, dynamic> data) async {
     final res = await ApiService.put(
-      '${ApiConfig.adminLocations}/$id',
-      data: data,
-    );
+        '${ApiConfig.adminLocations}/$id', data: data);
     return res.data;
   }
 
@@ -160,9 +133,18 @@ class AdminService {
     return res.data;
   }
 
-  static Future<Map<String, dynamic>> addCategory(String name) async {
-    final res = await ApiService.post(ApiConfig.adminCategories,
-        data: {'name': name});
+  // POST /admin/categories  { name }
+  static Future<Map<String, dynamic>> createCategory(
+      Map<String, dynamic> data) async {
+    final res = await ApiService.post(ApiConfig.adminCategories, data: data);
+    return res.data;
+  }
+
+  // PUT /admin/categories/{id}
+  static Future<Map<String, dynamic>> updateCategory(
+      int id, Map<String, dynamic> data) async {
+    final res = await ApiService.put(
+        '${ApiConfig.adminCategories}/$id', data: data);
     return res.data;
   }
 

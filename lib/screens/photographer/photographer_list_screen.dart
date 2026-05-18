@@ -47,8 +47,6 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
     {'value':'price_desc','label':'Price: High to Low'},
   ];
 
-  // ── Helper: selectable chip ──────────────────────────────────────────────
-
   Widget _pxChip({
     required String label,
     required bool selected,
@@ -83,8 +81,6 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
       ),
     );
   }
-
-  // ────────────────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -174,7 +170,6 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
           minChildSize: 0.5,
           expand: false,
           builder: (_, ctrl) => ListView(controller: ctrl, children: [
-            // Handle
             Center(child: Container(
               margin: const EdgeInsets.only(top: 12, bottom: 8),
               width: 40, height: 4,
@@ -185,7 +180,6 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                // Header
                 Row(children: [
                   const Text('Filters', style: TextStyle(
                       fontSize: 18, fontWeight: FontWeight.w800)),
@@ -199,66 +193,54 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
                 ]),
                 const SizedBox(height: 20),
 
-                // Location
                 const Text('Location', style: TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 10),
                 Wrap(spacing: 8, runSpacing: 8,
                   children: _locations.map((l) => _pxChip(
-                    label: l,
-                    selected: _location == l,
+                    label: l, selected: _location == l,
                     onTap: () => setModal(() =>
                         _location = _location == l ? '' : l),
-                  )).toList(),
-                ),
+                  )).toList()),
                 const SizedBox(height: 20),
 
-                // Category
                 const Text('Category', style: TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 10),
                 Wrap(spacing: 8, runSpacing: 8,
                   children: _categories.map((c) => _pxChip(
-                    label: c,
-                    selected: _category == c,
+                    label: c, selected: _category == c,
                     onTap: () => setModal(() =>
                         _category = _category == c ? '' : c),
-                  )).toList(),
-                ),
+                  )).toList()),
                 const SizedBox(height: 20),
 
-                // Gender
                 const Text('Gender', style: TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 10),
                 Wrap(spacing: 8, runSpacing: 8,
                   children: _genders.map((g) => _pxChip(
-                    label: g,
-                    selected: _gender == g,
+                    label: g, selected: _gender == g,
                     onTap: () => setModal(() =>
                         _gender = _gender == g ? '' : g),
-                  )).toList(),
-                ),
+                  )).toList()),
                 const SizedBox(height: 20),
 
-                // Price
                 Text(
-                  'Price: Ksh ${_priceRange.start.toInt().toStringAsFixed(0)} '
-                  '– Ksh ${_priceRange.end.toInt().toStringAsFixed(0)} /hr',
+                  'Price: Ksh ${_priceRange.start.toInt()} '
+                  '– Ksh ${_priceRange.end.toInt()} /hr',
                   style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
                 RangeSlider(
                   values: _priceRange,
-                  min: 0, max: 50000,
-                  divisions: 100,
+                  min: 0, max: 50000, divisions: 100,
                   activeColor: kPrimary,
                   inactiveColor: Colors.black.withValues(alpha: 0.1),
                   onChanged: (v) => setModal(() => _priceRange = v),
                 ),
                 const SizedBox(height: 20),
 
-                // Min rating
                 const Text('Minimum Rating', style: TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 10),
@@ -272,7 +254,6 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
                 )).toList()),
                 const SizedBox(height: 28),
 
-                // Apply
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -302,13 +283,14 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
       backgroundColor: kBackground,
       appBar: AppBar(
         title: const Text('Browse Photographers'),
+        // ← Use context.pop() so swipe-back and button both work
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
         ),
       ),
       body: Column(children: [
-        // ── Search + filter bar ───────────────────────────────────────
+        // ── Search + filter bar ──────────────────────────────────────
         Container(
           color: kSurface,
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -320,17 +302,13 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search photographers…',
                   hintStyle: TextStyle(
-                      color: Colors.black.withValues(alpha: 0.35),
-                      fontSize: 14),
+                      color: Colors.black.withValues(alpha: 0.35), fontSize: 14),
                   prefixIcon: Icon(Icons.search,
                       color: Colors.black.withValues(alpha: 0.4), size: 18),
                   suffixIcon: _searchCtrl.text.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear, size: 16),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            _load();
-                          },
+                          onPressed: () { _searchCtrl.clear(); _load(); },
                         )
                       : null,
                   isDense: true,
@@ -357,7 +335,6 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            // Sort dropdown
             DropdownButtonHideUnderline(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -376,15 +353,11 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
                     child: Text(o['label']!,
                         style: const TextStyle(fontSize: 12)),
                   )).toList(),
-                  onChanged: (v) {
-                    setState(() => _sortBy = v!);
-                    _load();
-                  },
+                  onChanged: (v) { setState(() => _sortBy = v!); _load(); },
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            // Filter button
             Badge(
               isLabelVisible: _hasActiveFilters,
               backgroundColor: kAccent,
@@ -447,7 +420,7 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
             ]),
           ),
 
-        // ── Results ───────────────────────────────────────────────────
+        // ── Results ──────────────────────────────────────────────────
         Expanded(
           child: _loading && _photographers.isEmpty
               ? const LoadingWidget(message: 'Finding photographers…')
@@ -491,7 +464,8 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
                               mainAxisSpacing: 12,
                               childAspectRatio: 0.62,
                             ),
-                            itemCount: _photographers.length + (_hasMore ? 1 : 0),
+                            itemCount:
+                                _photographers.length + (_hasMore ? 1 : 0),
                             itemBuilder: (ctx, i) {
                               if (i == _photographers.length) {
                                 _loadMore();
@@ -502,10 +476,12 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
                                       color: kPrimary, strokeWidth: 2),
                                 ));
                               }
+                              final id = _photographers[i]['id'];
                               return PhotographerCard(
                                 photographer: _photographers[i],
-                                onTap: () => context.go(
-                                    '/photographers/${_photographers[i]['id']}'),
+                                // ← push so swipe-back returns to list
+                                onTap: () => context.push(
+                                    '/photographers/$id'),
                               );
                             },
                           ),

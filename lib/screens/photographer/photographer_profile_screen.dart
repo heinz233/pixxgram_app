@@ -160,54 +160,53 @@ class _PhotographerProfileScreenState extends State<PhotographerProfileScreen>
               const SizedBox(height: 20),
 
               // Date picker
-              GestureDetector(
-                onTap: () async {
-                  final d = await showDatePicker(
-                    context: ctx,
-                    initialDate: DateTime.now().add(const Duration(days: 1)),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                    builder: (ctx, child) => Theme(
-                      data: Theme.of(ctx).copyWith(
-                        colorScheme: const ColorScheme.light(primary: kPrimary),
-                      ),
-                      child: child!,
+                GestureDetector(
+                  onTap: () async {
+                    final now  = DateTime.now();
+                    final min  = now.add(const Duration(hours: 2));
+                    final d = await showDatePicker(
+                      context: ctx,
+                      initialDate: min,
+                      firstDate:   min,
+                      lastDate:    now.add(const Duration(days: 365)),
+                    );
+                    if (d == null) return;
+                    // Also pick time
+                    final t = await showTimePicker(
+                      context: ctx,
+                      initialTime: TimeOfDay(hour: min.hour, minute: 0),
+                    );
+                    if (t != null) {
+                      setModal(() => _selectedDate = DateTime(
+                        d.year, d.month, d.day, t.hour, t.minute));
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: kBackground,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.black.withValues(alpha: 0.12)),
                     ),
-                  );
-                  if (d != null) setModal(() => _selectedDate = d);
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: kBackground,
-                    border: Border.all(
-                        color: _selectedDate != null
-                            ? kPrimary
-                            : Colors.black.withValues(alpha: 0.12)),
-                    borderRadius: BorderRadius.circular(12),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_month_outlined,
+                            size: 16, color: Colors.black54),
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedDate == null
+                              ? 'Select date & time'
+                              : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year} at ${_selectedDate!.hour.toString().padLeft(2, '0')}:${_selectedDate!.minute.toString().padLeft(2, '0')}',
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: _selectedDate == null
+                                  ? Colors.black54
+                                  : Colors.black87),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(children: [
-                    Icon(Icons.calendar_today_outlined,
-                        size: 18, color: kPrimary.withValues(alpha: 0.7)),
-                    const SizedBox(width: 10),
-                    Text(
-                      _selectedDate == null
-                          ? 'Select session date'
-                          : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: _selectedDate == null
-                              ? Colors.black.withValues(alpha: 0.4)
-                              : kPrimary,
-                          fontWeight: _selectedDate != null
-                              ? FontWeight.w600
-                              : FontWeight.normal),
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.chevron_right, size: 18),
-                  ]),
                 ),
-              ),
               const SizedBox(height: 12),
 
               TextFormField(
@@ -269,41 +268,78 @@ class _PhotographerProfileScreenState extends State<PhotographerProfileScreen>
     );
   }
 
-  Future<void> _submitBooking(BuildContext sheetCtx) async {
-    if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Please select a date'),
-          backgroundColor: kWarning));
-      return;
-    }
-
-    // Capture navigator BEFORE the await gap
-    final nav = Navigator.of(sheetCtx);
-    final messenger = ScaffoldMessenger.of(context);
-
-    setState(() => _submittingBooking = true);
-    try {
-      await BookingService.create(
-        photographerId: widget.id,
-        bookingDate: _selectedDate!.toIso8601String(),
-        notes: _notesCtrl.text.isEmpty ? null : _notesCtrl.text,
-      );
-      if (!mounted) return;
-      nav.pop();
-      messenger.showSnackBar(const SnackBar(
-          content: Text('✓ Booking request sent!'),
-          backgroundColor: kSuccess));
-      _notesCtrl.clear();
-      setState(() => _selectedDate = null);
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: kError));
-    } finally {
-      if (mounted) setState(() => _submittingBooking = false);
-    }
-  }
+      Future<void> _submitBooking(BuildContext sheetCtx) async {
+        if (_selectedDate == null) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Please select a date and time'),
+              backgroundColor: kWarning));
+          return;
+        }
+      
+        // Must be at least 1 hour from now (matches Laravel validation)
+        if (_selectedDate!.isBefore(DateTime.now().add(const Duration(hours: 1)))) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Booking must be at least 1 hour from now'),
+              backgroundColor: kWarning));
+          return;
+        }
+      
+        final nav       = Navigator.of(sheetCtx);
+        final messenger = ScaffoldMessenger.of(context);
+      
+        setState(() => _submittingBooking = true);
+        try {
+          await BookingService.create(
+            photographerId: widget.id,
+            bookingDate:    _selectedDate!.toIso8601String(),
+            notes:          _notesCtrl.text.isEmpty ? null : _notesCtrl.text,
+          );
+          if (!mounted) return;
+          nav.pop();
+          messenger.showSnackBar(const SnackBar(
+              content: Text('✓ Booking request sent! The photographer will confirm shortly.'),
+              backgroundColor: kSuccess,
+              duration: Duration(seconds: 4)));
+          _notesCtrl.clear();
+          setState(() => _selectedDate = null);
+      
+        } catch (e) {
+          if (!mounted) return;
+          // Parse error the same way Vue BookingDialog does
+          String msg = 'Booking failed. Please try again.';
+          try {
+            final response = (e as dynamic).response;
+            final status   = response?.statusCode as int?;
+            final data     = response?.data as Map?;
+            final srvMsg   = data?['message'] as String? ?? '';
+      
+            if (status == 409) {
+              msg = srvMsg.isNotEmpty
+                  ? srvMsg
+                  : 'You already have a pending booking with this photographer on that day.';
+            } else if (status == 403) {
+              msg = 'Only clients can make bookings.';
+            } else if (status == 422) {
+              final errors = data?['errors'] as Map? ?? {};
+              final first  = (errors.values.first as List?)?.first as String?;
+              msg = first ?? srvMsg;
+              if (msg.isEmpty) {
+                msg = 'Please check the booking details.';
+              }
+            } else if (status == 401) {
+              msg = 'Your session has expired. Please log in again.';
+            } else if (srvMsg.isNotEmpty) {
+              msg = srvMsg;
+            }
+          } catch (_) {}
+      
+          messenger.showSnackBar(SnackBar(
+              content: Text(msg), backgroundColor: kError,
+              duration: const Duration(seconds: 5)));
+        } finally {
+          if (mounted) setState(() => _submittingBooking = false);
+        }
+      }
 
   // ── Rating ────────────────────────────────────────────────────────────────
 

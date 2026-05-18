@@ -29,9 +29,9 @@ class AppRouter {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
     redirect: (context, state) {
-      final auth       = Provider.of<AuthProvider>(context, listen: false);
-      final isLoggedIn = auth.isAuthenticated;
-      final loc        = state.matchedLocation;
+      final auth        = Provider.of<AuthProvider>(context, listen: false);
+      final isLoggedIn  = auth.isAuthenticated;
+      final loc         = state.matchedLocation;
       final isAuthRoute = loc == '/login' || loc == '/signup' || loc == '/splash';
 
       if (!isLoggedIn && !isAuthRoute) return '/login';
@@ -43,58 +43,96 @@ class AppRouter {
       return null;
     },
     routes: [
-      // ── Auth & shared ──────────────────────────────────────────────────
+      // ── Auth & shared ──────────────────────────────────────────────
       GoRoute(path: '/splash', builder: (c, s) => const SplashScreen()),
       GoRoute(path: '/login',  builder: (c, s) => const LoginScreen()),
       GoRoute(path: '/signup', builder: (c, s) => const SignupScreen()),
       GoRoute(path: '/home',   builder: (c, s) => const HomeScreen()),
 
-      // ── Public photographer browsing ───────────────────────────────────
+      // ── Public photographer browsing ───────────────────────────────
+      // Uses push-style page so swipe-back works from profile → list
       GoRoute(
         path: '/photographers',
-        builder: (c, s) => PhotographerListScreen(
-          initialSearch:   s.uri.queryParameters['search'],
-          initialCategory: s.uri.queryParameters['category'],
-          initialLocation: s.uri.queryParameters['location'],
+        pageBuilder: (c, s) => MaterialPage(
+          key: s.pageKey,
+          child: PhotographerListScreen(
+            initialSearch:   s.uri.queryParameters['search'],
+            initialCategory: s.uri.queryParameters['category'],
+            initialLocation: s.uri.queryParameters['location'],
+          ),
         ),
-      ),
-      GoRoute(
-        path: '/photographers/:id',
-        builder: (c, s) {
-          // Fix: parse String path param to int safely
-          final raw = s.pathParameters['id'] ?? '0';
-          final id  = int.tryParse(raw) ?? 0;
-          return PhotographerProfileScreen(id: id);
-        },
+        routes: [
+          // Nested so /photographers/:id is a child — enables swipe back
+          GoRoute(
+            path: ':id',
+            pageBuilder: (c, s) {
+              final raw = s.pathParameters['id'] ?? '0';
+              final id  = int.tryParse(raw) ?? 0;
+              return MaterialPage(
+                key: s.pageKey,
+                child: PhotographerProfileScreen(id: id),
+              );
+            },
+          ),
+        ],
       ),
 
-      // ── Photographer dashboard ─────────────────────────────────────────
+      // ── Photographer dashboard ─────────────────────────────────────
+      // Dashboard tabs use go() so no back stack between them
       GoRoute(path: '/dashboard',
           builder: (c, s) => const DashboardScreen()),
-      GoRoute(path: '/dashboard/portfolio',
-          builder: (c, s) => const PortfolioScreen()),
-      GoRoute(path: '/dashboard/subscription',
-          builder: (c, s) => const SubscriptionScreen()),
-      GoRoute(path: '/dashboard/bookings',
-          builder: (c, s) => const PhotographerBookingsScreen()),
-      GoRoute(path: '/dashboard/messages',
-          builder: (c, s) => const MessagesScreen()),
-      GoRoute(path: '/dashboard/profile',
-          builder: (c, s) => const EditProfileScreen()),
 
-      // ── Client ─────────────────────────────────────────────────────────
-      GoRoute(path: '/bookings',
-          builder: (c, s) => const ClientBookingsScreen()),
+      // Sub-pages use pageBuilder so swipe-back returns to dashboard
+      GoRoute(
+        path: '/dashboard/portfolio',
+        pageBuilder: (c, s) => const MaterialPage(child: PortfolioScreen()),
+      ),
+      GoRoute(
+        path: '/dashboard/subscription',
+        pageBuilder: (c, s) =>
+            const MaterialPage(child: SubscriptionScreen()),
+      ),
+      GoRoute(
+        path: '/dashboard/bookings',
+        pageBuilder: (c, s) =>
+            const MaterialPage(child: PhotographerBookingsScreen()),
+      ),
+      GoRoute(
+        path: '/dashboard/messages',
+        pageBuilder: (c, s) =>
+            const MaterialPage(child: MessagesScreen()),
+      ),
+      GoRoute(
+        path: '/dashboard/profile',
+        pageBuilder: (c, s) =>
+            const MaterialPage(child: EditProfileScreen()),
+      ),
 
-      // ── Admin ──────────────────────────────────────────────────────────
+      // ── Client ─────────────────────────────────────────────────────
+      GoRoute(
+        path: '/bookings',
+        pageBuilder: (c, s) =>
+            const MaterialPage(child: ClientBookingsScreen()),
+      ),
+
+      // ── Admin ──────────────────────────────────────────────────────
       GoRoute(path: '/admin',
           builder: (c, s) => const AdminDashboardScreen()),
-      GoRoute(path: '/admin/photographers',
-          builder: (c, s) => const AdminPhotographersScreen()),
-      GoRoute(path: '/admin/reports',
-          builder: (c, s) => const AdminReportsScreen()),
-      GoRoute(path: '/admin/locations',
-          builder: (c, s) => const AdminLocationsScreen()),
+      GoRoute(
+        path: '/admin/photographers',
+        pageBuilder: (c, s) =>
+            const MaterialPage(child: AdminPhotographersScreen()),
+      ),
+      GoRoute(
+        path: '/admin/reports',
+        pageBuilder: (c, s) =>
+            const MaterialPage(child: AdminReportsScreen()),
+      ),
+      GoRoute(
+        path: '/admin/locations',
+        pageBuilder: (c, s) =>
+            const MaterialPage(child: AdminLocationsScreen()),
+      ),
     ],
   );
 }

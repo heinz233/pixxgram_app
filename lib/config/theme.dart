@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 export 'package:flutter/material.dart' show Colors;
 
 // ── Light theme colors (pixxgramLight) ────────────────────────────────────────
-const kPrimary    = Color(0xFF1A1A2E); // deep navy — main brand
-const kSecondary  = Color(0xFFC9A84C); // gold
-const kAccent     = Color(0xFFE8623A); // orange-red
-const kBackground = Color(0xFFF7F5F2); // warm off-white
+const kPrimary    = Color(0xFF1A1A2E);
+const kSecondary  = Color(0xFFC9A84C);
+const kAccent     = Color(0xFFE8623A);
+const kBackground = Color(0xFFF7F5F2);
 const kSurface    = Color(0xFFFFFFFF);
 const kError      = Color(0xFFD32F2F);
 const kSuccess    = Color(0xFF2E7D32);
@@ -17,18 +17,27 @@ const kWarning    = Color(0xFFF57C00);
 // ── Dark theme colors (pixxgramDark) ─────────────────────────────────────────
 const kDarkBackground = Color(0xFF0D0D1A);
 const kDarkSurface    = Color(0xFF16213E);
-const kDarkPrimary    = Color(0xFFC9A84C); // gold becomes primary in dark
+const kDarkPrimary    = Color(0xFFC9A84C);
 const kDarkSecondary  = Color(0xFFE8623A);
 
 // ── Utility ───────────────────────────────────────────────────────────────────
-const kBorder    = Color(0x12000000); // rgba(0,0,0,0.07)
-const kTextMuted = Color(0x73000000); // rgba(0,0,0,0.45)
+const kBorder    = Color(0x12000000);
+const kTextMuted = Color(0x73000000);
 
 ThemeData pixxgramLight() {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     scaffoldBackgroundColor: kBackground,
+
+    // ── Enables iOS-style swipe-back on Android too ──────────────────
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS:     CupertinoPageTransitionsBuilder(),
+      },
+    ),
+
     colorScheme: const ColorScheme.light(
       primary:   kPrimary,
       secondary: kSecondary,
@@ -112,6 +121,15 @@ ThemeData pixxgramDark() {
     useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: kDarkBackground,
+
+    // ── Enables iOS-style swipe-back on Android too ──────────────────
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS:     CupertinoPageTransitionsBuilder(),
+      },
+    ),
+
     colorScheme: const ColorScheme.dark(
       primary:   kDarkPrimary,
       secondary: kDarkSecondary,

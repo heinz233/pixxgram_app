@@ -33,14 +33,14 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   final _categories = const [
-    {'label':'Wedding',     'icon': Icons.favorite_border,    'color': Colors.pink},
-    {'label':'Portrait',    'icon': Icons.account_circle,      'color': Colors.purple},
-    {'label':'Events',      'icon': Icons.celebration,         'color': Colors.orange},
-    {'label':'Fashion',     'icon': Icons.checkroom,           'color': Colors.teal},
-    {'label':'Corporate',   'icon': Icons.business_center,     'color': Colors.blue},
-    {'label':'Nature',      'icon': Icons.park,                'color': Colors.green},
-    {'label':'Real Estate', 'icon': Icons.home_outlined,       'color': Colors.brown},
-    {'label':'Sports',      'icon': Icons.directions_run,      'color': Colors.red},
+    {'label':'Wedding',     'icon': Icons.favorite_border,  'color': Colors.pink},
+    {'label':'Portrait',    'icon': Icons.account_circle,   'color': Colors.purple},
+    {'label':'Events',      'icon': Icons.celebration,      'color': Colors.orange},
+    {'label':'Fashion',     'icon': Icons.checkroom,        'color': Colors.teal},
+    {'label':'Corporate',   'icon': Icons.business_center,  'color': Colors.blue},
+    {'label':'Nature',      'icon': Icons.park,             'color': Colors.green},
+    {'label':'Real Estate', 'icon': Icons.home_outlined,    'color': Colors.brown},
+    {'label':'Sports',      'icon': Icons.directions_run,   'color': Colors.red},
   ];
 
   final _steps = const [
@@ -61,8 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
      'quote':"Joined 6 months ago and I've tripled my bookings. The platform handles everything — I just focus on shooting."},
   ];
 
-  // ── Helper: extract initials from a name ─────────────────────────────────
-
   String initials(String? name) {
     if (name == null || name.trim().isEmpty) return '?';
     final parts = name.trim().split(' ');
@@ -71,8 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return name[0].toUpperCase();
   }
-
-  // ─────────────────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -104,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final queryString = q.isNotEmpty
         ? '?${q.entries.map((e) => '${e.key}=${e.value}').join('&')}'
         : '';
+    // go() is correct here — replacing home with list screen
     context.go('/photographers$queryString');
   }
 
@@ -117,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onRefresh: _loadPhotographers,
         child: CustomScrollView(
           slivers: [
-            // ── AppBar ─────────────────────────────────────────────────
+            // ── AppBar ───────────────────────────────────────────────
             SliverAppBar(
               floating: true,
               backgroundColor: kSurface,
@@ -125,17 +122,18 @@ class _HomeScreenState extends State<HomeScreen> {
               elevation: 0,
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(1),
-                child: Divider(height: 1, color: Colors.black.withValues(alpha: 0.07)),
+                child: Divider(height: 1,
+                    color: Colors.black.withValues(alpha: 0.07)),
               ),
               title: Row(children: [
-                // Logo
                 Container(
                   width: 32, height: 32,
                   decoration: BoxDecoration(
                     color: kPrimary,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.photo_camera, size: 18, color: Colors.white),
+                  child: const Icon(Icons.photo_camera,
+                      size: 18, color: Colors.white),
                 ),
                 const SizedBox(width: 8),
                 const Text('Pixxgram',
@@ -155,7 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   TextButton(
                     onPressed: () => context.go('/login'),
                     child: const Text('Sign in',
-                        style: TextStyle(color: kPrimary, fontWeight: FontWeight.w600)),
+                        style: TextStyle(
+                            color: kPrimary, fontWeight: FontWeight.w600)),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -164,8 +163,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimary,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        textStyle: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       child: const Text('Get started'),
                     ),
@@ -188,8 +189,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         backgroundColor: kPrimary,
                         child: Text(
                           initials(auth.user?.name),
-                          style: const TextStyle(color: Colors.white,
-                              fontWeight: FontWeight.w700, fontSize: 12),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12),
                         ),
                       ),
                     ),
@@ -199,14 +202,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
             SliverToBoxAdapter(child: Column(children: [
 
-              // ── Hero section ──────────────────────────────────────────
+              // ── Hero ────────────────────────────────────────────────
               Container(
                 color: kPrimary,
                 padding: const EdgeInsets.fromLTRB(20, 48, 20, 48),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  // Kenya badge
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: kSecondary,
                       borderRadius: BorderRadius.circular(20),
@@ -216,13 +220,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontSize: 11, fontWeight: FontWeight.w600)),
                   ),
                   const SizedBox(height: 20),
-
-                  // Hero title
                   RichText(
                     text: const TextSpan(
                       style: TextStyle(
                           fontSize: 32, fontWeight: FontWeight.w900,
-                          color: Colors.white, letterSpacing: -1.5, height: 1.1),
+                          color: Colors.white, letterSpacing: -1.5,
+                          height: 1.1),
                       children: [
                         TextSpan(text: 'Find the perfect\n'),
                         TextSpan(text: 'photographer',
@@ -232,7 +235,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   Text(
                     'Browse hundreds of professional photographers across Kenya. '
                     'Book, message, and pay via M-Pesa — all in one place.',
@@ -262,11 +264,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 value: _location.isEmpty ? null : _location,
                                 hint: const Text('Location',
                                     style: TextStyle(fontSize: 14)),
-                                isExpanded: true,
-                                isDense: true,
+                                isExpanded: true, isDense: true,
                                 items: _locationItems.map((l) =>
-                                    DropdownMenuItem(value: l, child: Text(l, style: const TextStyle(fontSize: 14)))).toList(),
-                                onChanged: (v) => setState(() => _location = v ?? ''),
+                                    DropdownMenuItem(value: l,
+                                        child: Text(l, style: const TextStyle(
+                                            fontSize: 14)))).toList(),
+                                onChanged: (v) =>
+                                    setState(() => _location = v ?? ''),
                               ),
                             ),
                           ),
@@ -281,11 +285,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 value: _category.isEmpty ? null : _category,
                                 hint: const Text('Category',
                                     style: TextStyle(fontSize: 14)),
-                                isExpanded: true,
-                                isDense: true,
+                                isExpanded: true, isDense: true,
                                 items: _categoryItems.map((c) =>
-                                    DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(fontSize: 14)))).toList(),
-                                onChanged: (v) => setState(() => _category = v ?? ''),
+                                    DropdownMenuItem(value: c,
+                                        child: Text(c, style: const TextStyle(
+                                            fontSize: 14)))).toList(),
+                                onChanged: (v) =>
+                                    setState(() => _category = v ?? ''),
                               ),
                             ),
                           ),
@@ -317,15 +323,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: _trendingTags.map((tag) => GestureDetector(
                       onTap: () => setState(() => _category = tag),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
                         decoration: BoxDecoration(
                           border: Border.all(
                               color: Colors.white.withValues(alpha: 0.3)),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(tag,
-                            style: TextStyle(
-                                fontSize: 12,
+                            style: TextStyle(fontSize: 12,
                                 color: Colors.white.withValues(alpha: 0.7))),
                       ),
                     )).toList(),
@@ -333,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ]),
               ),
 
-              // ── Stats bar ─────────────────────────────────────────────
+              // ── Stats ────────────────────────────────────────────────
               Container(
                 color: kSurface,
                 padding: const EdgeInsets.symmetric(vertical: 24),
@@ -342,24 +348,23 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: _stats.map((s) => Column(children: [
                     Text(s['value']!,
                         style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
+                            fontSize: 22, fontWeight: FontWeight.w800,
                             color: kPrimary)),
                     const SizedBox(height: 2),
                     Text(s['label']!,
-                        style: TextStyle(
-                            fontSize: 11,
+                        style: TextStyle(fontSize: 11,
                             color: Colors.black.withValues(alpha: 0.45))),
                   ])).toList(),
                 ),
               ),
               Divider(height: 1, color: Colors.black.withValues(alpha: 0.06)),
 
-              // ── Browse by Category ────────────────────────────────────
+              // ── Categories ───────────────────────────────────────────
               Container(
                 color: kSurface,
                 padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   const Text('Browse by Category',
                       style: TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w700)),
@@ -370,7 +375,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: _categories.map((cat) {
                         final color = cat['color'] as Color;
                         return GestureDetector(
-                          onTap: () => context.go('/photographers?category=${cat['label']}'),
+                          // go() is fine here — navigating to list screen
+                          onTap: () => context.go(
+                              '/photographers?category=${cat['label']}'),
                           child: Container(
                             margin: const EdgeInsets.only(right: 12),
                             padding: const EdgeInsets.symmetric(
@@ -397,7 +404,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(height: 8),
                                 Text(cat['label'] as String,
                                     style: const TextStyle(
-                                        fontSize: 12, fontWeight: FontWeight.w600)),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
                               ],
                             ),
                           ),
@@ -408,11 +416,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ]),
               ),
 
-              // ── Featured Photographers ────────────────────────────────
+              // ── Featured Photographers ───────────────────────────────
               Container(
                 color: kBackground,
                 padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   SectionHeader(
                     title: 'Featured Photographers',
                     subtitle: 'Top-rated professionals across Kenya',
@@ -441,28 +450,34 @@ class _HomeScreenState extends State<HomeScreen> {
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
                         childAspectRatio: 0.62,
                       ),
                       itemCount: _photographers.length,
-                      itemBuilder: (_, i) => PhotographerCard(
-                        photographer: _photographers[i],
-                        onTap: () => context.go('/photographers/${_photographers[i]['id']}'),
-                      ),
+                      itemBuilder: (_, i) {
+                        final id = _photographers[i]['id'];
+                        return PhotographerCard(
+                          photographer: _photographers[i],
+                          // ← push so swipe-back returns to home
+                          onTap: () => context.push('/photographers/$id'),
+                        );
+                      },
                     ),
                 ]),
               ),
 
-              // ── How it works ──────────────────────────────────────────
+              // ── How it works ─────────────────────────────────────────
               Container(
                 color: kBackground,
                 padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
                 child: Column(children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
                       color: kSecondary,
                       borderRadius: BorderRadius.circular(20),
@@ -474,78 +489,79 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 12),
                   const Text('Book in 3 easy steps',
                       style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 24, fontWeight: FontWeight.w800,
                           letterSpacing: -0.5),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 4),
                   Text('From search to shoot in minutes',
-                      style: TextStyle(
-                          fontSize: 13,
+                      style: TextStyle(fontSize: 13,
                           color: Colors.black.withValues(alpha: 0.45)),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 28),
                   ..._steps.map((s) => Padding(
                     padding: const EdgeInsets.only(bottom: 24),
-                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Column(children: [
-                        Container(
-                          width: 28, height: 28,
-                          decoration: const BoxDecoration(
-                              color: kSecondary,
-                              shape: BoxShape.circle),
-                          child: Center(child: Text(s['step'] as String,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800))),
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          width: 72, height: 72,
-                          decoration: BoxDecoration(
-                            color: kPrimary.withValues(alpha: 0.07),
-                            borderRadius: BorderRadius.circular(20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(children: [
+                          Container(
+                            width: 28, height: 28,
+                            decoration: const BoxDecoration(
+                                color: kSecondary, shape: BoxShape.circle),
+                            child: Center(child: Text(s['step'] as String,
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 13,
+                                    fontWeight: FontWeight.w800))),
                           ),
-                          child: Icon(s['icon'] as IconData,
-                              size: 30, color: kPrimary),
-                        ),
-                      ]),
-                      const SizedBox(width: 16),
-                      Expanded(child: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(s['title'] as String,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 15)),
-                          const SizedBox(height: 4),
-                          Text(s['desc'] as String,
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                  height: 1.5)),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: 72, height: 72,
+                            decoration: BoxDecoration(
+                              color: kPrimary.withValues(alpha: 0.07),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(s['icon'] as IconData,
+                                size: 30, color: kPrimary),
+                          ),
                         ]),
-                      )),
-                    ]),
+                        const SizedBox(width: 16),
+                        Expanded(child: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(s['title'] as String,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15)),
+                              const SizedBox(height: 4),
+                              Text(s['desc'] as String,
+                                  style: TextStyle(fontSize: 13,
+                                      color: Colors.black.withValues(
+                                          alpha: 0.5),
+                                      height: 1.5)),
+                            ],
+                          ),
+                        )),
+                      ],
+                    ),
                   )),
                 ]),
               ),
 
-              // ── Testimonials ──────────────────────────────────────────
+              // ── Testimonials ─────────────────────────────────────────
               Container(
                 color: kSurface,
                 padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
                 child: Column(children: [
                   const Text('What our users say',
                       style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 20, fontWeight: FontWeight.w800,
                           letterSpacing: -0.5),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 4),
                   Text('Trusted by thousands across Kenya',
-                      style: TextStyle(
-                          fontSize: 13,
+                      style: TextStyle(fontSize: 13,
                           color: Colors.black.withValues(alpha: 0.45)),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 20),
@@ -558,15 +574,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.black.withValues(alpha: 0.07)),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      // Stars
-                      Row(children: List.generate(5,
-                          (_) => const Icon(Icons.star,
-                              size: 14, color: kSecondary))),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                      Row(children: List.generate(5, (_) =>
+                          const Icon(Icons.star, size: 14, color: kSecondary))),
                       const SizedBox(height: 10),
                       Text('"${t['quote']}"',
-                          style: TextStyle(
-                              fontSize: 13,
+                          style: TextStyle(fontSize: 13,
                               color: Colors.black.withValues(alpha: 0.65),
                               height: 1.6)),
                       const SizedBox(height: 14),
@@ -576,21 +590,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           backgroundColor: kPrimary,
                           child: Text(
                             (t['name'] as String).substring(0, 1),
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14),
+                            style: const TextStyle(color: Colors.white,
+                                fontWeight: FontWeight.w700, fontSize: 14),
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Column(crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                           Text(t['name'] as String,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13)),
+                                  fontWeight: FontWeight.w600, fontSize: 13)),
                           Text(t['role'] as String,
-                              style: TextStyle(
-                                  fontSize: 11,
+                              style: TextStyle(fontSize: 11,
                                   color: Colors.black.withValues(alpha: 0.45))),
                         ]),
                       ]),
@@ -599,7 +610,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ]),
               ),
 
-              // ── CTA section ───────────────────────────────────────────
+              // ── CTA ──────────────────────────────────────────────────
               Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
@@ -612,17 +623,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(children: [
                   const Text('Are you a photographer?',
                       style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: -0.5),
+                          fontSize: 24, fontWeight: FontWeight.w800,
+                          color: Colors.white, letterSpacing: -0.5),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 10),
                   Text(
                     'Join thousands of photographers earning on Pixxgram. '
                     'Set your rates, manage bookings, get paid via M-Pesa.',
-                    style: TextStyle(
-                        fontSize: 13,
+                    style: TextStyle(fontSize: 13,
                         color: Colors.white.withValues(alpha: 0.75),
                         height: 1.6),
                     textAlign: TextAlign.center,
@@ -657,7 +665,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ]),
               ),
 
-              // ── Footer ────────────────────────────────────────────────
+              // ── Footer ───────────────────────────────────────────────
               Container(
                 color: kPrimary,
                 padding: const EdgeInsets.all(20),
@@ -669,32 +677,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      // Fixed: Icons.camera_iris → Icons.camera_alt
                       child: const Icon(Icons.camera_alt,
                           size: 16, color: Colors.white),
                     ),
                     const SizedBox(width: 8),
                     const Text('Pixxgram',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16)),
+                        style: TextStyle(color: Colors.white,
+                            fontWeight: FontWeight.w800, fontSize: 16)),
                   ]),
                   const SizedBox(height: 12),
                   Text(
                     "Kenya's premier photography marketplace. "
                     "Connect, book, and create.",
-                    style: TextStyle(
-                        fontSize: 12,
+                    style: TextStyle(fontSize: 12,
                         color: Colors.white.withValues(alpha: 0.5),
                         height: 1.5),
                   ),
                   const SizedBox(height: 16),
                   Divider(color: Colors.white.withValues(alpha: 0.1)),
                   const SizedBox(height: 12),
-                  Text('© 2026 Pixxgram — Heinz Ateng\'',
-                      style: TextStyle(
-                          fontSize: 11,
+                  Text("© 2026 Pixxgram — Heinz Ateng'",
+                      style: TextStyle(fontSize: 11,
                           color: Colors.white.withValues(alpha: 0.35))),
                 ]),
               ),
@@ -706,7 +709,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ── Skeleton card while loading ───────────────────────────────────────────────
 class _SkeletonCard extends StatelessWidget {
   const _SkeletonCard();
   @override
@@ -717,12 +719,14 @@ class _SkeletonCard extends StatelessWidget {
           height: 160,
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.07),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(16)),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(12),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             Container(height: 14, width: 120,
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.07),
@@ -739,7 +743,6 @@ class _SkeletonCard extends StatelessWidget {
   }
 }
 
-// ── Error state ───────────────────────────────────────────────────────────────
 class _ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
@@ -758,8 +761,8 @@ class _ErrorState extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
           Text(message,
-              style: TextStyle(
-                  fontSize: 11, color: Colors.black.withValues(alpha: 0.45)),
+              style: TextStyle(fontSize: 11,
+                  color: Colors.black.withValues(alpha: 0.45)),
               textAlign: TextAlign.center),
           const SizedBox(height: 16),
           ElevatedButton.icon(
@@ -767,9 +770,7 @@ class _ErrorState extends StatelessWidget {
             icon: const Icon(Icons.refresh, size: 16),
             label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              foregroundColor: Colors.white,
-            ),
+                backgroundColor: kPrimary, foregroundColor: Colors.white),
           ),
         ]),
       ),
