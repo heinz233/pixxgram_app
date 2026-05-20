@@ -62,6 +62,8 @@ class PhotographerService {
         };
       }).toList();
 
+
+
       return {
         'photographer': data,
         'portfolio':    portfolios,

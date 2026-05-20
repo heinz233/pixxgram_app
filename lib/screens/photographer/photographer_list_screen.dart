@@ -480,8 +480,11 @@ class _PhotographerListScreenState extends State<PhotographerListScreen> {
                               return PhotographerCard(
                                 photographer: _photographers[i],
                                 // ← push so swipe-back returns to list
-                                onTap: () => context.push(
-                                    '/photographers/$id'),
+                                // RIGHT — always parse to int safely
+                                  onTap: () {
+                                    final id = int.tryParse(_photographers[i]['id'].toString()) ?? 0;
+                                    context.push('/photographers/$id');
+                                  },
                               );
                             },
                           ),
